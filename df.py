@@ -1,23 +1,67 @@
 #!/usr/bin/env python
 
-import curses
+
+import sys
+import pygame
 import time
 
+class QuitGame(Exception): pass
+
 def main():
-    curses.wrapper(start)
+    pygame.display.init()
+    pygame.display.set_caption("Dwarf Frontier")
 
-def start(stdscr):
-    pad = curses.newpad(100,100)
+    size = (width, height) = (1280, 720)
+    speed = [2, 2]
+    black = 0, 0, 0
 
-    for y in range(0,100):
-        for x in range(0,100):
-            try: pad.addch(y,x,ord('a')+(x*x+y*y) % 26)
-            except curses.error: pass
+    screen = pygame.display.set_mode(size,
+        pygame.RESIZABLE | pygame.DOUBLEBUF)
 
-    for i in range(100):
-        pad.noutrefresh(i,i, 0,0, 20, 75)
-        curses.doupdate()
-        time.sleep(0.25)
+    ball = pygame.image.load("ball.gif")
+    ballrect = ball.get_rect()
+
+    frames = 0
+    last_fps = time.time()
+    clock = pygame.time.Clock()
+    while True:
+        frames += 1
+        clock.tick(60)
+
+        handle_events()
+
+        screen.fill(black, ballrect)
+
+        ballrect = ballrect.move(speed)
+        if ballrect.left < 0 or ballrect.right > width:
+            speed[0] = -speed[0]
+        if ballrect.top < 0 or ballrect.bottom > height:
+            speed[1] = -speed[1]
+
+        screen.blit(ball, ballrect)
+
+        pygame.display.flip()
+
+        if time.time() - last_fps > 1:
+            print "%0.2f" % (frames *1.0 / (time.time() - last_fps),)
+            last_fps = time.time()
+            frames = 0
+
+
+
+
+def handle_events():
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            raise QuitGame()
+
+        if event.type == pygame.KEYDOWN:
+
+            if event.key == pygame.K_ESCAPE:
+                raise QuitGame()
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except QuitGame:
+        pass
