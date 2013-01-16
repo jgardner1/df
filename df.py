@@ -24,11 +24,23 @@ def main():
     frames = 0
     last_fps = time.time()
     clock = pygame.time.Clock()
+    SHOW_FPS = pygame.USEREVENT + 1
+    pygame.time.set_timer(SHOW_FPS, 1000) 
     while True:
         frames += 1
         clock.tick(60)
 
-        handle_events()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                raise QuitGame()
+
+            if event.type == pygame.KEYDOWN:
+
+                if event.key == pygame.K_ESCAPE:
+                    raise QuitGame()
+
+            if event.type == SHOW_FPS:
+                print clock.get_fps()
 
         screen.fill(black, ballrect)
 
@@ -42,23 +54,6 @@ def main():
 
         pygame.display.flip()
 
-        if time.time() - last_fps > 1:
-            print "%0.2f" % (frames *1.0 / (time.time() - last_fps),)
-            last_fps = time.time()
-            frames = 0
-
-
-
-
-def handle_events():
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            raise QuitGame()
-
-        if event.type == pygame.KEYDOWN:
-
-            if event.key == pygame.K_ESCAPE:
-                raise QuitGame()
 
 if __name__ == '__main__':
     try:
