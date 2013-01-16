@@ -14,9 +14,10 @@ def start(stdscr):
             try: pad.addch(y,x,ord('a')+(x*x+y*y) % 26)
             except curses.error: pass
 
-    pad.noutrefresh(0,0, 5,5, 20, 75)
-    curses.doupdate()
-    time.sleep(5)
+    for i in range(100):
+        pad.noutrefresh(i,i, 0,0, 20, 75)
+        curses.doupdate()
+        time.sleep(0.25)
 
 if __name__ == '__main__':
     main()
