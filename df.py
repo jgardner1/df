@@ -18,24 +18,31 @@ class Map(object):
 
     def __init__(self, tileset):
         self.tileset = tileset
-        self.width = 4
-        self.height = 4
+        self.width = 200
+        self.height = 200
         self.depth = 1
 
         self.tiles = transpose([[(random.choice([2,3]),random.choice((4,5)))
-        for i in range(20)] for j in range(20)]) 
+        for i in range(self.width)] for j in range(self.height)]) 
+
+        self._draw_surface()
 
     def update(self):
         pass
 
-    def draw(self, screen, viewport):
+    def _draw_surface(self):
         tileset = self.tileset
+        self.surface = pygame.Surface(
+            (self.width*tileset.tile_width,
+                self.height*tileset.tile_height))
         for i, row in enumerate(self.tiles):
             for j, tile in enumerate(row):
-                screen.blit(
+                self.surface.blit(
                     tileset[tile[0]][tile[1]],
-                    (i*16+viewport.left,
-                        j*16+viewport.top))
+                    (i*tileset.tile_width, j*tileset.tile_height))
+
+    def draw(self, screen, viewport):
+        screen.blit(self.surface, viewport)
 
 
 class Tileset(list):
@@ -44,29 +51,28 @@ class Tileset(list):
         self.tile_width = tile_width
         self.tile_height = tile_height or tile_width
 
-        image = pygame.image.load("RPG_Maker_VX_RTP_Tileset_by_telles0808.png")
+        image = pygame.image.load(filename)
         r = image.get_rect()
-        for x in range(0, r.width/16):
+        for x in range(0, r.width/tile_width):
             self.append([])
-            for y in range(0, r.height/16):
-                self[-1].append(image.subsurface(x*16, y*16, 16, 16))
+            for y in range(0, r.height/tile_height):
+                self[-1].append(image.subsurface(x*tile_width, y*tile_height,
+                    tile_width, tile_height))
 
 
 def main():
     pygame.display.init()
     pygame.font.init()
 
-    pygame.display.set_caption("Dwarf Frontier")
-
     font = pygame.font.Font(None, 32)
 
 
-    size = (width, height) = (1280, 720)
+    size = (width, height) = (640, 480)
 
     screen = pygame.display.set_mode(size,
         pygame.RESIZABLE | pygame.DOUBLEBUF)
 
-    tiles = Tileset("tileset.png", 16, 16)
+    tiles = Tileset("RPG_Maker_VX_RTP_Tileset_by_telles0808.png", 16, 16)
     map = Map(tiles)
 
             
