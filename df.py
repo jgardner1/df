@@ -59,6 +59,69 @@ class Tileset(list):
                 self[-1].append(image.subsurface(x*tile_width, y*tile_height,
                     tile_width, tile_height))
 
+class Dart(pygame.sprite.Sprite):
+
+    def __init__(self, tileset, facing, x, y, speed):
+        pygame.sprite.Sprite.__init__(self)
+        self.tileset = tileset
+        self.facing = facing
+        self.frame = 0
+        self.rect = pygame.Rect(x, y,
+            self.tileset.tile_width, self.tileset.tile_height)
+        self._update_image()
+        self.speed = speed
+        self.count = speed
+
+        self.big_count = random.randrange(200)
+
+    def update(self):
+        self.big_count -= 1
+        if self.big_count <= 0:
+            self.facing = random.choice((0,1,2,3))
+            self.big_count = random.randrange(200)
+
+        self.count -= 1
+        if self.count <= 0:
+            self.frame = (self.frame+1)%4
+            self.count = self.speed
+            if self.facing == 0:
+                self.rect.top += 4
+            elif self.facing == 1:
+                self.rect.left -= 4;
+            elif self.facing == 2:
+                self.rect.right += 4
+            elif self.facing == 3:
+                self.rect.top -= 4
+
+            if self.rect.bottom < 0:
+                self.rect.bottom = 0
+                self.facing = 0
+            if self.rect.bottom > 200:
+                self.rect.bottom = 200
+                self.facing = 3
+            if self.rect.left < 0:
+                self.rect.left = 0
+                self.facing = 2
+            if self.rect.right > 200:
+                self.rect.right = 200
+                self.facing = 1
+            self._update_image()
+
+
+    def _update_image(self):
+        self.image = self.tileset[self.frame][self.facing]
+
+class SpriteGroup(pygame.sprite.Group):
+
+    def draw(self, surface):
+        sprites = self.sprites()
+        sprites.sort(key=lambda sprite: sprite.rect.bottom)
+        surface_blit = surface.blit
+        for spr in sprites:
+            self.spritedict[spr] = surface_blit(spr.image, spr.rect)
+        self.lostsprites = []
+    
+
 
 def main():
     pygame.display.init()
@@ -72,8 +135,19 @@ def main():
     screen = pygame.display.set_mode(size,
         pygame.RESIZABLE | pygame.DOUBLEBUF)
 
+    # The main map and tileset
     tiles = Tileset("RPG_Maker_VX_RTP_Tileset_by_telles0808.png", 16, 16)
     map = Map(tiles)
+
+    # Dart
+    dart_tiles = Tileset("dart.png", 32, 48)
+
+    darts = SpriteGroup()
+    for i in range(20):
+        darts.add(Dart(dart_tiles, random.randrange(4),
+            random.randrange(200),
+            random.randrange(200),
+            random.randrange(2,20)))
 
             
     # The game clock. This will record how many ticks have passed as well as
@@ -128,10 +202,12 @@ def main():
                         pygame.Color(0,0,0))
 
         viewport.move_ip(*viewport_velocity)
+        darts.update()
 
         screen.fill((0,0,0))
         map.draw(screen, viewport)
         screen.blit(fps_text, (300,0))
+        darts.draw(screen)
 
         pygame.display.flip()
 
