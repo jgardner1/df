@@ -4,6 +4,7 @@
 import sys
 import pygame
 import time
+import random
 
 class QuitGame(Exception): pass
 
@@ -21,11 +22,8 @@ class Map(object):
         self.height = 4
         self.depth = 1
 
-        self.tiles = transpose([
-            [(2,0),(3,0)],
-            [(2,1),(3,1)],
-            [(2,2),(3,2)],
-        ])
+        self.tiles = transpose([[(random.choice([2,3]),random.choice((4,5)))
+        for i in range(20)] for j in range(20)]) 
 
     def update(self):
         pass
@@ -79,6 +77,7 @@ def main():
     # This event will show the FPS
     SHOW_FPS = pygame.USEREVENT + 1
     pygame.time.set_timer(SHOW_FPS, 1000) 
+    fps_text = font.render("FPS:", True, pygame.Color(255,0,0), pygame.Color(0,0,0))
 
     viewport = pygame.Rect(0,0,100,100)
     viewport_velocity = [0,0]
@@ -116,16 +115,17 @@ def main():
                     viewport_velocity[0] -= 10
 
             if event.type == SHOW_FPS:
-                screen.blit(
-                    font.render("%0.1f" % (clock.get_fps()),
+                
+                fps_text = font.render("FPS: %0.1f" % (clock.get_fps()),
                         True,
                         pygame.Color(255,0,0),
-                        pygame.Color(0,0,0)),
-                    (300,0))
+                        pygame.Color(0,0,0))
 
         viewport.move_ip(*viewport_velocity)
 
+        screen.fill((0,0,0))
         map.draw(screen, viewport)
+        screen.blit(fps_text, (300,0))
 
         pygame.display.flip()
 
