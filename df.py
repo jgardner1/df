@@ -17,6 +17,20 @@ class Map(object):
             [1,1,1,1,],
         ]
 
+class Tileset(list):
+
+    def __init__(self, filename, tile_width, tile_height=None):
+        self.tile_width = tile_width
+        self.tile_height = tile_height or tile_width
+
+        image = pygame.image.load("tileset.png")
+        r = image.get_rect()
+        for x in range(0, r.width/16):
+            self.append([])
+            for y in range(0, r.height/16):
+                self[-1].append(image.subsurface(x*16, y*16, 16, 16))
+
+
 def main():
     pygame.display.init()
     pygame.font.init()
@@ -31,9 +45,9 @@ def main():
     screen = pygame.display.set_mode(size,
         pygame.RESIZABLE | pygame.DOUBLEBUF)
 
-    ball = pygame.image.load("ball.gif")
-    ballrect = ball.get_rect()
+    tiles = Tileset("tileset.png", 16, 16)
 
+            
     # The game clock. This will record how many ticks have passed as well as
     # limit us to 60 fps
     clock = pygame.time.Clock()
@@ -41,8 +55,6 @@ def main():
     # This event will show the FPS
     SHOW_FPS = pygame.USEREVENT + 1
     pygame.time.set_timer(SHOW_FPS, 1000) 
-
-    title = font.render("Hello world!", True, pygame.Color(0,0,255,255))
 
     viewport = pygame.Rect(0,0,100,100)
     viewport_velocity = [0,0]
@@ -86,15 +98,11 @@ def main():
                         pygame.Color(0,0,0)),
                     (300,0))
 
-        #screen.fill((0,0,0), ballrect)
-
         viewport.move_ip(*viewport_velocity)
 
         for i in range(4):
             for j in range(4):
-                screen.blit(ball, (i*64+viewport.left,j*64+viewport.top))
-
-        screen.blit(title, (0,0))
+                screen.blit(tiles[0][0], (i*20+viewport.left,j*20+viewport.top))
 
         pygame.display.flip()
 
