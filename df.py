@@ -22,9 +22,9 @@ class Map(object):
         self.depth = 1
 
         self.tiles = transpose([
-            [(0,0),(0,0),(0,0),(0,0),],
-            [(0,0),(0,3),(0,4),(0,0),],
-            [(0,0),(0,0),(0,0),(0,0),],
+            [(2,0),(3,0)],
+            [(2,1),(3,1)],
+            [(2,2),(3,2)],
         ])
 
     def update(self):
@@ -36,8 +36,8 @@ class Map(object):
             for j, tile in enumerate(row):
                 screen.blit(
                     tileset[tile[0]][tile[1]],
-                    (i*20+viewport.left,
-                        j*20+viewport.top))
+                    (i*16+viewport.left,
+                        j*16+viewport.top))
 
 
 class Tileset(list):
@@ -46,7 +46,7 @@ class Tileset(list):
         self.tile_width = tile_width
         self.tile_height = tile_height or tile_width
 
-        image = pygame.image.load("tileset.png")
+        image = pygame.image.load("RPG_Maker_VX_RTP_Tileset_by_telles0808.png")
         r = image.get_rect()
         for x in range(0, r.width/16):
             self.append([])
