@@ -7,15 +7,38 @@ import time
 
 class QuitGame(Exception): pass
 
+def transpose(matrix):
+    return map(list, zip(*matrix))
 
 class Map(object):
+        
+    class Cell(object):
+        pass
 
-    def __init__(self):
-        self.tiles = [
-            [1,1,1,1,],
-            [1,1,1,1,],
-            [1,1,1,1,],
-        ]
+    def __init__(self, tileset):
+        self.tileset = tileset
+        self.width = 4
+        self.height = 4
+        self.depth = 1
+
+        self.tiles = transpose([
+            [(0,0),(0,0),(0,0),(0,0),],
+            [(0,0),(0,3),(0,4),(0,0),],
+            [(0,0),(0,0),(0,0),(0,0),],
+        ])
+
+    def update(self):
+        pass
+
+    def draw(self, screen, viewport):
+        tileset = self.tileset
+        for i, row in enumerate(self.tiles):
+            for j, tile in enumerate(row):
+                screen.blit(
+                    tileset[tile[0]][tile[1]],
+                    (i*20+viewport.left,
+                        j*20+viewport.top))
+
 
 class Tileset(list):
 
@@ -46,6 +69,7 @@ def main():
         pygame.RESIZABLE | pygame.DOUBLEBUF)
 
     tiles = Tileset("tileset.png", 16, 16)
+    map = Map(tiles)
 
             
     # The game clock. This will record how many ticks have passed as well as
@@ -58,6 +82,7 @@ def main():
 
     viewport = pygame.Rect(0,0,100,100)
     viewport_velocity = [0,0]
+
     while True:
         clock.tick(60)
 
@@ -71,9 +96,9 @@ def main():
                     raise QuitGame()
 
                 if event.key == pygame.K_UP:
-                    viewport_velocity[1] += 10
-                if event.key == pygame.K_DOWN:
                     viewport_velocity[1] += -10
+                if event.key == pygame.K_DOWN:
+                    viewport_velocity[1] += 10
                 if event.key == pygame.K_LEFT:
                     viewport_velocity[0] += -10
                 if event.key == pygame.K_RIGHT:
@@ -82,9 +107,9 @@ def main():
             if event.type == pygame.KEYUP:
 
                 if event.key == pygame.K_UP:
-                    viewport_velocity[1] -= 10
-                if event.key == pygame.K_DOWN:
                     viewport_velocity[1] -= -10
+                if event.key == pygame.K_DOWN:
+                    viewport_velocity[1] -= 10
                 if event.key == pygame.K_LEFT:
                     viewport_velocity[0] -= -10
                 if event.key == pygame.K_RIGHT:
@@ -100,9 +125,7 @@ def main():
 
         viewport.move_ip(*viewport_velocity)
 
-        for i in range(4):
-            for j in range(4):
-                screen.blit(tiles[0][0], (i*20+viewport.left,j*20+viewport.top))
+        map.draw(screen, viewport)
 
         pygame.display.flip()
 
