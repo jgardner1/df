@@ -1,17 +1,34 @@
 #!/usr/bin/env python
 
+# Copyright (c) 2013 Jonathan Gardner jgardner@jonathangardner.net
+
+# Email me for a license you'd like to use this with. I'm open to whatever
+# works for you, whatever that may be.
+
 
 import sys
 import pygame
 import time
 import random
 
+# Used to signal the game should stop running. This is how you break out of
+# the game loop.
 class QuitGame(Exception): pass
 
+# TODO: Use numpy
 def transpose(matrix):
+    """Transposes an array of arrays into an array of arrays. IE,
+    [[1,2,3],[4,5,6]] goes to [[1,4],[2,5],[3,6]]"""
     return map(list, zip(*matrix))
 
 class Map(object):
+    """The game map view object.
+
+    This contains its own reference to a particular tileset and a Surface that
+    contains a rendering of the current Z level.
+
+    I plan to bring out the model object (containing the cells and their
+    contents)."""
         
     class Cell(object):
         pass
@@ -125,18 +142,25 @@ class SpriteGroup(pygame.sprite.Group):
 
 
 def main():
+    # Init pygame
     pygame.display.init()
     pygame.font.init()
 
     font = pygame.font.Font(None, 32)
 
-
+    # TODO: Base this on the actual window size, using the VIDEORESIZE event.
     size = (width, height) = (640, 480)
 
+    # This is the screen to draw on.
+    # TODO: I'd like an overlay of the game title and controls they can click
+    # on.
     screen = pygame.display.set_mode(size,
         pygame.RESIZABLE | pygame.DOUBLEBUF)
 
+    # Initialize game objects. Ideally, the models would already be in place.
     # The main map and tileset
+
+    # The map
     tiles = Tileset("RPG_Maker_VX_RTP_Tileset_by_telles0808.png", 16, 16)
     map = Map(tiles)
 
@@ -152,20 +176,44 @@ def main():
 
             
     # The game clock. This will record how many ticks have passed as well as
-    # limit us to 60 fps
+    # limit us to 60 fps.
     clock = pygame.time.Clock()
 
     # This event will show the FPS
     SHOW_FPS = pygame.USEREVENT + 1
+
+    # Set the SHOW_FPS event to update every 10 seconds.
     pygame.time.set_timer(SHOW_FPS, 1000) 
+
+    # Prepare the text to display in every frame. The FPS is updated by
+    # modifying this.
     fps_text = font.render("FPS:", True, pygame.Color(255,0,0), pygame.Color(0,0,0))
 
+    # The offset the user has selected either using arrow keys or the mouse.
+    # This is passed into the draw functions as a sort of translation matrix.
+    # (TODO: Use an actual matrix transform! OpenGL FTW!!!)
     viewport = pygame.Rect(0,0,100,100)
+
+    # The way the arrow keys work is that we get only events when a key is
+    # pressed or released. I adjust the velocity of the viewport according to
+    # what the key events were. Then I apply it.
+    # TODO: Implement some sort of delay so that a tap on the key will not
+    # result in several moves.
     viewport_velocity = [0,0]
 
+    # The main game loop.
     while True:
+
+        # Limit the game loop to once per 1/60 of a second.
         clock.tick(60)
 
+        #
+        # Event handler.
+        # 
+
+        # Ideally, this would dispatch appropriately. I'd have
+        # an event dispatch function that would eventually go to the right
+        # controller method.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 raise QuitGame()
@@ -237,28 +285,65 @@ def main():
                     viewport.move_ip(event.rel)
 
             elif event.type == SHOW_FPS:
-                
+                # Our custom event to update the FPS display. Note that all we
+                # do is replace the text. The text is drawn every frame.
                 fps_text = font.render("FPS: %0.1f" % (clock.get_fps()),
                         True,
                         pygame.Color(255,0,0),
                         pygame.Color(0,0,0))
 
 
+        # Apply the velocity from the key state for motion.
         viewport.move_ip(*viewport_velocity)
+
+        #
+        # Update
+        #
+
+        # TODO: The map will come alive, along with all the MOBs. We first
+        # call an update to update all their states.
+
+        # Next, we call an update to the sprites. They may need to adjust
+        # based on how the map and MOBs have changed.
+        # TODO: There is a tricky dependency here. Animating means that the
+        # actual representations of the objects move in discrete intervals.
+        # We need some way to reconcile the model's idea of where the object
+        # is at with the animated representation of it. I do not want to
+        # introduce a dependency of the model on the view. An idea is that the
+        # sprite knows where it is at on the screen, and the model tells it
+        # where it should be. It rounds off to the closest animation cell and
+        # actual screen position, keeping track of whether it should be
+        # stepping with the right or left leg.
         darts.update()
 
+        #
+        # Assemble the Display
+        #
+
         # Blank the screen
+        # TODO: Either make sure subsequent blits completely cover the screen,
+        # or use dirtying to minimize the amount of updates we actually do.
         screen.fill((0,0,0))
 
+        # TODO: May need to use a clip rect to contain the map and images if
+        # we use a square display?
+        # Draw the map to the viewport. Note the map rarely changes.
         map.draw(screen, viewport)
+
+        # Draw the sprites on top.
         darts.draw(screen, viewport)
 
+        # TODO: Draw a simple toolbar and status message on top of the above.
+
+        # Draw the FPS message.
         screen.blit(fps_text, (300,0))
 
+        # Flip the display!
         pygame.display.flip()
 
-
 if __name__ == '__main__':
+    # This is outside the main loop because I think it may be faster than
+    # setting it up during event processing.
     try:
         main()
     except QuitGame:
