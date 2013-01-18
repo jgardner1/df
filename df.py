@@ -170,7 +170,7 @@ def main():
             if event.type == pygame.QUIT:
                 raise QuitGame()
 
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_ESCAPE:
                     raise QuitGame()
@@ -184,7 +184,7 @@ def main():
                 if event.key == pygame.K_RIGHT:
                     viewport_velocity[0] += 10
 
-            if event.type == pygame.KEYUP:
+            elif event.type == pygame.KEYUP:
 
                 if event.key == pygame.K_UP:
                     viewport_velocity[1] -= -10
@@ -195,12 +195,54 @@ def main():
                 if event.key == pygame.K_RIGHT:
                     viewport_velocity[0] -= 10
 
-            if event.type == SHOW_FPS:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    # left button
+                    pass
+                elif event.button == 2:
+                    # middle button
+                    pass
+                elif event.button == 3:
+                    # right button
+                    pass
+                elif event.button == 4:
+                    # scroll up
+                    pass
+                elif event.button == 5:
+                    # scroll down
+                    pass
+
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    # left button
+                    pass
+                elif event.button == 2:
+                    # middle button
+                    pass
+                elif event.button == 3:
+                    # right button
+                    pass
+                elif event.button == 4:
+                    # scroll up
+                    pass
+                elif event.button == 5:
+                    # scroll down
+                    pass
+
+            elif event.type == pygame.MOUSEMOTION:
+                # event.pos: The absolute position of the mouse
+                # event.rel: The relative motion since the last firing
+                # event.buttons: The buttons pressed (left, middle, right)
+                if event.buttons[2]: # RMB
+                    viewport.move_ip(event.rel)
+
+            elif event.type == SHOW_FPS:
                 
                 fps_text = font.render("FPS: %0.1f" % (clock.get_fps()),
                         True,
                         pygame.Color(255,0,0),
                         pygame.Color(0,0,0))
+
 
         viewport.move_ip(*viewport_velocity)
         darts.update()
