@@ -28,8 +28,11 @@ class MapModel(object):
     def __init__(self):
         self.width = 200
         self.height = 200
-        self.tiles = transpose([[(random.choice([2,3]),random.choice((4,5)))
-            for i in range(self.width)] for j in range(self.height)]) 
+        self.depth = 1
+
+        self.tiles = [
+            [random.choice((1,2,3,4,5,6)) for y in range(self.height)]
+            for x in range(self.width)]
 
 class MapView(object):
     """The game map view object.
@@ -38,26 +41,39 @@ class MapView(object):
     contains a rendering of the current Z level.
     """
         
-    class Cell(object):
-        pass
-
     def __init__(self, model, tileset):
         self.model = model
         self.tileset = tileset
-        self.depth = 1
+        self.z = 1
 
         self._draw_surface()
 
     def update(self):
         pass
 
+    def _terrain_to_tile(self, terrain, x, y, z):
+        """Given a terrain and an x,y,z coordinate, choose one of the possible
+        tiles. Note that it must be consistent."""
+        terrain_map = {
+            1:(0,4),
+            2:(2,4),
+            3:(6,4),
+            4:(8,4),
+            5:(10,4),
+            6:(12,4),
+        }
+        tile = terrain_map[terrain]
+        return (tile[0]+x%2, tile[1]+y%2)
+
     def _draw_surface(self):
         tileset = self.tileset
         self.surface = pygame.Surface(
             (self.model.width*tileset.tile_width,
                 self.model.height*tileset.tile_height))
+
         for i, row in enumerate(self.model.tiles):
-            for j, tile in enumerate(row):
+            for j, terrain in enumerate(row):
+                tile = self._terrain_to_tile(terrain,i,j,self.z)
                 self.surface.blit(
                     tileset[tile[0]][tile[1]],
                     (i*tileset.tile_width, j*tileset.tile_height))
