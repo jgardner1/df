@@ -113,12 +113,13 @@ class Dart(pygame.sprite.Sprite):
 
 class SpriteGroup(pygame.sprite.Group):
 
-    def draw(self, surface):
+    def draw(self, surface, viewport):
         sprites = self.sprites()
         sprites.sort(key=lambda sprite: sprite.rect.bottom)
         surface_blit = surface.blit
         for spr in sprites:
-            self.spritedict[spr] = surface_blit(spr.image, spr.rect)
+            self.spritedict[spr] = surface_blit(spr.image,
+                spr.rect.move(viewport.left, viewport.top))
         self.lostsprites = []
     
 
@@ -204,10 +205,13 @@ def main():
         viewport.move_ip(*viewport_velocity)
         darts.update()
 
+        # Blank the screen
         screen.fill((0,0,0))
+
         map.draw(screen, viewport)
+        darts.draw(screen, viewport)
+
         screen.blit(fps_text, (300,0))
-        darts.draw(screen)
 
         pygame.display.flip()
 
