@@ -21,26 +21,30 @@ def transpose(matrix):
     [[1,2,3],[4,5,6]] goes to [[1,4],[2,5],[3,6]]"""
     return map(list, zip(*matrix))
 
-class Map(object):
+class MapModel(object):
+    """Holds the data of the map. This is the tiles that make up the map along
+    with all features that are fixed (everything but items and people.)"""
+
+    def __init__(self):
+        self.width = 200
+        self.height = 200
+        self.tiles = transpose([[(random.choice([2,3]),random.choice((4,5)))
+            for i in range(self.width)] for j in range(self.height)]) 
+
+class MapView(object):
     """The game map view object.
 
     This contains its own reference to a particular tileset and a Surface that
     contains a rendering of the current Z level.
-
-    I plan to bring out the model object (containing the cells and their
-    contents)."""
+    """
         
     class Cell(object):
         pass
 
-    def __init__(self, tileset):
+    def __init__(self, model, tileset):
+        self.model = model
         self.tileset = tileset
-        self.width = 200
-        self.height = 200
         self.depth = 1
-
-        self.tiles = transpose([[(random.choice([2,3]),random.choice((4,5)))
-        for i in range(self.width)] for j in range(self.height)]) 
 
         self._draw_surface()
 
@@ -50,9 +54,9 @@ class Map(object):
     def _draw_surface(self):
         tileset = self.tileset
         self.surface = pygame.Surface(
-            (self.width*tileset.tile_width,
-                self.height*tileset.tile_height))
-        for i, row in enumerate(self.tiles):
+            (self.model.width*tileset.tile_width,
+                self.model.height*tileset.tile_height))
+        for i, row in enumerate(self.model.tiles):
             for j, tile in enumerate(row):
                 self.surface.blit(
                     tileset[tile[0]][tile[1]],
@@ -162,7 +166,8 @@ def main():
 
     # The map
     tiles = Tileset("RPG_Maker_VX_RTP_Tileset_by_telles0808.png", 16, 16)
-    map = Map(tiles)
+    map_model = MapModel()
+    map_view = MapView(map_model, tiles)
 
     # Dart
     dart_tiles = Tileset("dart.png", 32, 48)
@@ -328,7 +333,7 @@ def main():
         # TODO: May need to use a clip rect to contain the map and images if
         # we use a square display?
         # Draw the map to the viewport. Note the map rarely changes.
-        map.draw(screen, viewport)
+        map_view.draw(screen, viewport)
 
         # Draw the sprites on top.
         darts.draw(screen, viewport)
