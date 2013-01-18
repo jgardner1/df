@@ -26,13 +26,39 @@ class MapModel(object):
     with all features that are fixed (everything but items and people.)"""
 
     def __init__(self):
-        self.width = 200
-        self.height = 200
+        self.width = 20
+        self.height = 20
         self.depth = 1
 
-        self.tiles = [
-            [random.choice((1,2,3,4,5,6)) for y in range(self.height)]
-            for x in range(self.width)]
+        self.tiles = transpose([
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,2,2,2,2,2,3,3,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,2,2,2,2,2,3,3,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+        ])
+
+    def terrain(self,x,y):
+        if 0 < x < self.width and 0 < y < self.height:
+            return self.tiles[x][y]
+        else:
+            return 0
+
 
 class MapView(object):
     """The game map view object.
@@ -51,9 +77,12 @@ class MapView(object):
     def update(self):
         pass
 
-    def _terrain_to_tile(self, terrain, x, y, z):
-        """Given a terrain and an x,y,z coordinate, choose one of the possible
-        tiles. Note that it must be consistent."""
+    def _draw_surface(self):
+        tileset = self.tileset
+        self.surface = pygame.Surface(
+            (self.model.width*tileset.tile_width,
+                self.model.height*tileset.tile_height))
+
         terrain_map = {
             1:(0,4),
             2:(2,4),
@@ -62,21 +91,29 @@ class MapView(object):
             5:(10,4),
             6:(12,4),
         }
-        tile = terrain_map[terrain]
-        return (tile[0]+x%2, tile[1]+y%2)
 
-    def _draw_surface(self):
-        tileset = self.tileset
-        self.surface = pygame.Surface(
-            (self.model.width*tileset.tile_width,
-                self.model.height*tileset.tile_height))
+        for x in range(self.model.width):
+            for y in range(self.model.height):
+                terrain = self.model.tiles[x][y]
+                if terrain == 0:
+                    terrain_up = self.model.tiles[x][y-1]
+                    if terrain_up == 0:
+                        terrain_up2 = self.model.tiles[x][y-2]
+                        if terrain_up2 == 0:
+                            continue
+                        else:
+                            tile_home = terrain_map[terrain_up2]
+                            tile = (tile_home[0]+x%2, tile_home[1]+3)
+                    else:
+                        tile_home = terrain_map[terrain_up]
+                        tile = (tile_home[0]+x%2, tile_home[1]+2)
+                else:
+                    tile_home = terrain_map[terrain]
+                    tile = (tile_home[0]+x%2, tile_home[1]+y%2)
 
-        for i, row in enumerate(self.model.tiles):
-            for j, terrain in enumerate(row):
-                tile = self._terrain_to_tile(terrain,i,j,self.z)
                 self.surface.blit(
                     tileset[tile[0]][tile[1]],
-                    (i*tileset.tile_width, j*tileset.tile_height))
+                    (x*tileset.tile_width, y*tileset.tile_height))
 
     def draw(self, screen, viewport):
         screen.blit(self.surface, viewport)
