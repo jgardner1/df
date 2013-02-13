@@ -220,6 +220,8 @@ def main():
     # result in several moves.
     viewport_velocity = [0,0]
 
+    mod_keys = set()
+
     # The main game loop.
     while True:
 
@@ -254,23 +256,28 @@ def main():
 
                 if event.key == pygame.K_UP:
                     viewport_velocity[1] += -10
-                if event.key == pygame.K_DOWN:
+                elif event.key == pygame.K_DOWN:
                     viewport_velocity[1] += 10
-                if event.key == pygame.K_LEFT:
+                elif event.key == pygame.K_LEFT:
                     viewport_velocity[0] += -10
-                if event.key == pygame.K_RIGHT:
+                elif event.key == pygame.K_RIGHT:
                     viewport_velocity[0] += 10
+                elif event.key in (pygame.K_RCTRL, pygame.K_LCTRL):
+                    mod_keys.add('CTRL')
 
             elif event.type == pygame.KEYUP:
 
                 if event.key == pygame.K_UP:
                     viewport_velocity[1] -= -10
-                if event.key == pygame.K_DOWN:
+                elif event.key == pygame.K_DOWN:
                     viewport_velocity[1] -= 10
-                if event.key == pygame.K_LEFT:
+                elif event.key == pygame.K_LEFT:
                     viewport_velocity[0] -= -10
-                if event.key == pygame.K_RIGHT:
+                elif event.key == pygame.K_RIGHT:
                     viewport_velocity[0] -= 10
+                elif event.key in (pygame.K_RCTRL, pygame.K_LCTRL):
+                    mod_keys.remove('CTRL')
+
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -330,26 +337,18 @@ def main():
             # Center it horizontally
             viewport.left = - (viewport.width - map_view.width)//2
         elif viewport.left < 0:
-            print "Clamping left"
             viewport.left = 0
-            print viewport
         elif viewport.right > map_view.width:
-            print "Clamping right"
             viewport.right = map_view.width
-            print viewport
 
         # Clamp the viewport vertically
         if viewport.height > map_view.height:
             # Center it vertically
             viewport.top = - (viewport.height - map_view.height)//2
         elif viewport.top < 0:
-            print "clamping top"
             viewport.top = 0
-            print viewport
         elif viewport.bottom > map_view.height:
-            print "clamping bottom"
             viewport.bottom = map_view.height
-            print viewport
 
 
         #
