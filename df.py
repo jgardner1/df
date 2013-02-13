@@ -71,8 +71,12 @@ class MapView(object):
         left = viewport.left
         top = viewport.top
 
-        for x in range(viewport.left//16, (viewport.right+15)//16):
-            for y in range(viewport.top//16, (viewport.bottom+15)//16):
+        for x in range(
+                max(0, viewport.left//16),
+                min(mw, (viewport.right+15)//16)):
+            for y in range(
+                    max(0, viewport.top//16),
+                    min(mh, (viewport.bottom+15)//16)):
                 tile = mtiles[x][y]
                 screen_blit(tileset[tile],
                     (x*16-left, y*16-top))
@@ -239,6 +243,9 @@ def main():
                 size = (width, height) = event.size
                 viewport.width, viewport.height = width, height
 
+                screen = pygame.display.set_mode(size,
+                    pygame.RESIZABLE | pygame.DOUBLEBUF)
+
 
             elif event.type == pygame.KEYDOWN:
 
@@ -318,20 +325,28 @@ def main():
         # Apply the velocity from the key state for motion.
         viewport.move_ip(*viewport_velocity)
 
-        if viewport.left < 0:
+        # Clamp the viewport horizontally
+        if viewport.width > map_view.width:
+            # Center it horizontally
+            viewport.left = - (viewport.width - map_view.width)//2
+        elif viewport.left < 0:
             print "Clamping left"
             viewport.left = 0
             print viewport
-        elif viewport.right > map_view.width and viewport.left > 0:
+        elif viewport.right > map_view.width:
             print "Clamping right"
             viewport.right = map_view.width
             print viewport
 
-        if viewport.top < 0:
+        # Clamp the viewport vertically
+        if viewport.height > map_view.height:
+            # Center it vertically
+            viewport.top = - (viewport.height - map_view.height)//2
+        elif viewport.top < 0:
             print "clamping top"
             viewport.top = 0
             print viewport
-        elif viewport.bottom > map_view.height and viewport.top > 0:
+        elif viewport.bottom > map_view.height:
             print "clamping bottom"
             viewport.bottom = map_view.height
             print viewport
