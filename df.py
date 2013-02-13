@@ -26,39 +26,19 @@ class MapModel(object):
     with all features that are fixed (everything but items and people.)"""
 
     def __init__(self):
-        self.width = 20
-        self.height = 20
+        self.width = 100
+        self.height = 100
         self.depth = 1
 
         self.tiles = transpose([
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,2,2,2,2,2,3,3,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,2,2,2,2,2,3,3,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
-        ])
+            [random.choice([0,1,2,3]) for _ in range(self.width)]
+            for _ in range(self.height)])
 
     def terrain(self,x,y):
         if 0 < x < self.width and 0 < y < self.height:
             return self.tiles[x][y]
         else:
             return 0
-
 
 class MapView(object):
     """The game map view object.
@@ -67,9 +47,11 @@ class MapView(object):
     contains a rendering of the current Z level.
     """
         
-    def __init__(self, model, tileset):
+    def __init__(self, model):
         self.model = model
-        self.tileset = tileset
+        self.tileset = Tileset("simple.png", 16, 16)
+        self.width = model.width*16
+        self.height = model.height*16
         self.z = 1
 
         self._draw_surface()
@@ -78,45 +60,22 @@ class MapView(object):
         pass
 
     def _draw_surface(self):
-        tileset = self.tileset
-        self.surface = pygame.Surface(
-            (self.model.width*tileset.tile_width,
-                self.model.height*tileset.tile_height))
-
-        terrain_map = {
-            1:(0,4),
-            2:(2,4),
-            3:(6,4),
-            4:(8,4),
-            5:(10,4),
-            6:(12,4),
-        }
-
-        for x in range(self.model.width):
-            for y in range(self.model.height):
-                terrain = self.model.tiles[x][y]
-                if terrain == 0:
-                    terrain_up = self.model.tiles[x][y-1]
-                    if terrain_up == 0:
-                        terrain_up2 = self.model.tiles[x][y-2]
-                        if terrain_up2 == 0:
-                            continue
-                        else:
-                            tile_home = terrain_map[terrain_up2]
-                            tile = (tile_home[0]+x%2, tile_home[1]+3)
-                    else:
-                        tile_home = terrain_map[terrain_up]
-                        tile = (tile_home[0]+x%2, tile_home[1]+2)
-                else:
-                    tile_home = terrain_map[terrain]
-                    tile = (tile_home[0]+x%2, tile_home[1]+y%2)
-
-                self.surface.blit(
-                    tileset[tile[0]][tile[1]],
-                    (x*tileset.tile_width, y*tileset.tile_height))
+        pass
 
     def draw(self, screen, viewport):
-        screen.blit(self.surface, viewport)
+        mw, mh = self.model.width, self.model.height
+
+        tileset = self.tileset
+        mtiles = self.model.tiles
+        screen_blit = screen.blit
+        left = viewport.left
+        top = viewport.top
+
+        for x in range(viewport.left//16, (viewport.right+15)//16):
+            for y in range(viewport.top//16, (viewport.bottom+15)//16):
+                tile = mtiles[x][y]
+                screen_blit(tileset[tile],
+                    (x*16-left, y*16-top))
 
 
 class Tileset(list):
@@ -127,10 +86,9 @@ class Tileset(list):
 
         image = pygame.image.load(filename)
         r = image.get_rect()
-        for x in range(0, r.width/tile_width):
-            self.append([])
-            for y in range(0, r.height/tile_height):
-                self[-1].append(image.subsurface(x*tile_width, y*tile_height,
+        for y in range(0, r.height/tile_height):
+            for x in range(0, r.width/tile_width):
+                self.append(image.subsurface(x*tile_width, y*tile_height,
                     tile_width, tile_height))
 
 class Dart(pygame.sprite.Sprite):
@@ -218,19 +176,18 @@ def main():
     # The main map and tileset
 
     # The map
-    tiles = Tileset("RPG_Maker_VX_RTP_Tileset_by_telles0808.png", 16, 16)
     map_model = MapModel()
-    map_view = MapView(map_model, tiles)
+    map_view = MapView(map_model)
 
     # Dart
-    dart_tiles = Tileset("dart.png", 32, 48)
+    #dart_tiles = Tileset("dart.png", 32, 48)
 
-    darts = SpriteGroup()
-    for i in range(20):
-        darts.add(Dart(dart_tiles, random.randrange(4),
-            random.randrange(200),
-            random.randrange(200),
-            random.randrange(2,20)))
+    #darts = SpriteGroup()
+    #for i in range(20):
+    #    darts.add(Dart(dart_tiles, random.randrange(4),
+    #        random.randrange(200),
+    #        random.randrange(200),
+    #        random.randrange(2,20)))
 
             
     # The game clock. This will record how many ticks have passed as well as
@@ -250,7 +207,7 @@ def main():
     # The offset the user has selected either using arrow keys or the mouse.
     # This is passed into the draw functions as a sort of translation matrix.
     # (TODO: Use an actual matrix transform! OpenGL FTW!!!)
-    viewport = pygame.Rect(0,0,100,100)
+    viewport = pygame.Rect(0,0,size[0],size[1])
 
     # The way the arrow keys work is that we get only events when a key is
     # pressed or released. I adjust the velocity of the viewport according to
@@ -275,6 +232,13 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 raise QuitGame()
+
+            elif event.type == pygame.VIDEORESIZE:
+                print "Video resize: %r %r %r %r" % (event, event.size, event.w, event.h)
+
+                size = (width, height) = event.size
+                viewport.width, viewport.height = width, height
+
 
             elif event.type == pygame.KEYDOWN:
 
@@ -340,7 +304,7 @@ def main():
                 # event.rel: The relative motion since the last firing
                 # event.buttons: The buttons pressed (left, middle, right)
                 if event.buttons[2]: # RMB
-                    viewport.move_ip(event.rel)
+                    viewport.move_ip([-event.rel[0], -event.rel[1]])
 
             elif event.type == SHOW_FPS:
                 # Our custom event to update the FPS display. Note that all we
@@ -353,6 +317,25 @@ def main():
 
         # Apply the velocity from the key state for motion.
         viewport.move_ip(*viewport_velocity)
+
+        if viewport.left < 0:
+            print "Clamping left"
+            viewport.left = 0
+            print viewport
+        elif viewport.right > map_view.width and viewport.left > 0:
+            print "Clamping right"
+            viewport.right = map_view.width
+            print viewport
+
+        if viewport.top < 0:
+            print "clamping top"
+            viewport.top = 0
+            print viewport
+        elif viewport.bottom > map_view.height and viewport.top > 0:
+            print "clamping bottom"
+            viewport.bottom = map_view.height
+            print viewport
+
 
         #
         # Update
@@ -372,7 +355,7 @@ def main():
         # where it should be. It rounds off to the closest animation cell and
         # actual screen position, keeping track of whether it should be
         # stepping with the right or left leg.
-        darts.update()
+        #darts.update()
 
         #
         # Assemble the Display
@@ -389,7 +372,7 @@ def main():
         map_view.draw(screen, viewport)
 
         # Draw the sprites on top.
-        darts.draw(screen, viewport)
+        #darts.draw(screen, viewport)
 
         # TODO: Draw a simple toolbar and status message on top of the above.
 
