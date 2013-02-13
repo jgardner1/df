@@ -157,7 +157,59 @@ class SpriteGroup(pygame.sprite.Group):
             self.spritedict[spr] = surface_blit(spr.image,
                 spr.rect.move(viewport.left, viewport.top))
         self.lostsprites = []
+
+class Viewport(pygame.Rect):
     
+    def __init__(self, *args, **kwargs):
+        pygame.Rect.__init__(self, *args, **kwargs)
+        self.zoom = 1.0
+        self.velocity = [0.0, 0.0]
+        self.map_view = None
+
+    def map_viewport(self):
+        """Returns the viewport the map uses. This will be a different size
+        based on the zoom.
+        
+        If zoom=1.0, then it returns the same viewport.
+        
+        If zoom=2.0, then it returns a viewport with half the width and height.
+        
+        If zoom=0.5, then it returns a viewport with twice the width and
+        height.
+        """
+
+        return pygame.Rect(
+            (self.left + self.right - self.width/z)/2.0,
+            (self.top + self.bottom - self.height/z)/2.0,
+            self.width/z,
+            self.height/z)
+
+    def update(self):
+        self.move_ip(*self.velocity)
+
+        mw, mh = self.map_view.width, self.map_view.height
+
+        # Clamp horizontally
+        if self.width > mw:
+            # Center it horizontally
+            self.left = - (self.width - mw)//2
+        elif self.left < 0:
+            self.left = 0
+        elif self.right > mw:
+            self.right = mw
+
+        # Clamp vertically
+        if self.height > mh:
+            # Center it vertically
+            self.top = - (self.height - mh)//2
+        elif self.top < 0:
+            self.top = 0
+        elif self.bottom > mh:
+            self.bottom = mh
+
+
+    def draw(self, screen):
+        self.map_view.draw(screen, self)
 
 def main():
     # Init pygame
@@ -210,14 +262,8 @@ def main():
     # The offset the user has selected either using arrow keys or the mouse.
     # This is passed into the draw functions as a sort of translation matrix.
     # (TODO: Use an actual matrix transform! OpenGL FTW!!!)
-    viewport = pygame.Rect(0,0,size[0],size[1])
-
-    # The way the arrow keys work is that we get only events when a key is
-    # pressed or released. I adjust the velocity of the viewport according to
-    # what the key events were. Then I apply it.
-    # TODO: Implement some sort of delay so that a tap on the key will not
-    # result in several moves.
-    viewport_velocity = [0,0]
+    viewport = Viewport(0,0,size[0],size[1])
+    viewport.map_view = map_view
 
     mod_keys = set()
 
@@ -254,26 +300,26 @@ def main():
                     raise QuitGame()
 
                 if event.key == pygame.K_UP:
-                    viewport_velocity[1] += -10
+                    viewport.velocity[1] += -10
                 elif event.key == pygame.K_DOWN:
-                    viewport_velocity[1] += 10
+                    viewport.velocity[1] += 10
                 elif event.key == pygame.K_LEFT:
-                    viewport_velocity[0] += -10
+                    viewport.velocity[0] += -10
                 elif event.key == pygame.K_RIGHT:
-                    viewport_velocity[0] += 10
+                    viewport.velocity[0] += 10
                 elif event.key in (pygame.K_RCTRL, pygame.K_LCTRL):
                     mod_keys.add('CTRL')
 
             elif event.type == pygame.KEYUP:
 
                 if event.key == pygame.K_UP:
-                    viewport_velocity[1] -= -10
+                    viewport.velocity[1] -= -10
                 elif event.key == pygame.K_DOWN:
-                    viewport_velocity[1] -= 10
+                    viewport.velocity[1] -= 10
                 elif event.key == pygame.K_LEFT:
-                    viewport_velocity[0] -= -10
+                    viewport.velocity[0] -= -10
                 elif event.key == pygame.K_RIGHT:
-                    viewport_velocity[0] -= 10
+                    viewport.velocity[0] -= 10
                 elif event.key in (pygame.K_RCTRL, pygame.K_LCTRL):
                     mod_keys.remove('CTRL')
 
@@ -342,31 +388,11 @@ def main():
                         pygame.Color(0,0,0))
 
 
-        # Apply the velocity from the key state for motion.
-        viewport.move_ip(*viewport_velocity)
-
-        # Clamp the viewport horizontally
-        if viewport.width > map_view.width:
-            # Center it horizontally
-            viewport.left = - (viewport.width - map_view.width)//2
-        elif viewport.left < 0:
-            viewport.left = 0
-        elif viewport.right > map_view.width:
-            viewport.right = map_view.width
-
-        # Clamp the viewport vertically
-        if viewport.height > map_view.height:
-            # Center it vertically
-            viewport.top = - (viewport.height - map_view.height)//2
-        elif viewport.top < 0:
-            viewport.top = 0
-        elif viewport.bottom > map_view.height:
-            viewport.bottom = map_view.height
-
-
         #
         # Update
         #
+        viewport.update()
+
 
         # TODO: The map will come alive, along with all the MOBs. We first
         # call an update to update all their states.
@@ -396,7 +422,7 @@ def main():
         # TODO: May need to use a clip rect to contain the map and images if
         # we use a square display?
         # Draw the map to the viewport. Note the map rarely changes.
-        map_view.draw(screen, viewport)
+        viewport.draw(screen)
 
         # Draw the sprites on top.
         #darts.draw(screen, viewport)
