@@ -159,7 +159,6 @@ class SpriteGroup(pygame.sprite.Group):
         self.lostsprites = []
     
 
-
 def main():
     # Init pygame
     pygame.display.init()
@@ -291,10 +290,20 @@ def main():
                     pass
                 elif event.button == 4:
                     # scroll up
-                    pass
+                    if 'CTRL' in mod_keys:
+                        # Zoom in
+                        pass
+                    else:
+                        # Level up
+                        pass
                 elif event.button == 5:
                     # scroll down
-                    pass
+                    if 'CTRL' in mod_keys:
+                        # Zoom out
+                        pass
+                    else:
+                        # Level down
+                        pass
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
@@ -308,9 +317,13 @@ def main():
                     pass
                 elif event.button == 4:
                     # scroll up
+                    # These events always follow the mouse down events
+                    # immediately
                     pass
                 elif event.button == 5:
                     # scroll down
+                    # These events always follow the mouse down events
+                    # immediately
                     pass
 
             elif event.type == pygame.MOUSEMOTION:
