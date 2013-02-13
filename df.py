@@ -179,15 +179,15 @@ class Viewport(pygame.Rect):
         """
 
         return pygame.Rect(
-            (self.left + self.right - self.width/z)/2.0,
-            (self.top + self.bottom - self.height/z)/2.0,
-            self.width/z,
-            self.height/z)
+            (self.left + self.right - self.width/self.zoom)/2.0,
+            (self.top + self.bottom - self.height/self.zoom)/2.0,
+            self.width/self.zoom,
+            self.height/self.zoom)
 
     def update(self):
         self.move_ip(*self.velocity)
 
-        mw, mh = self.map_view.width, self.map_view.height
+        mw, mh = self.map_view.width*self.zoom, self.map_view.height*self.zoom
 
         # Clamp horizontally
         if self.width > mw:
@@ -209,7 +209,21 @@ class Viewport(pygame.Rect):
 
 
     def draw(self, screen):
-        self.map_view.draw(screen, self)
+        mvp = self.map_viewport()
+        # Step 1: Draw the map to a map_viewport() sized surface.
+
+        unscaled_surf = pygame.Surface((mvp.width, mvp.height))
+        self.map_view.draw(unscaled_surf, mvp)
+
+        # Step 2: Smoothscale that surface.
+        scaled_surf = pygame.Surface((self.width, self.height))
+        pygame.transform.smoothscale(
+            unscaled_surf,
+            (self.width, self.height),
+            scaled_surf)
+
+        # Step 3: Draw the smoothscaled surface to the screen.
+        screen.blit(scaled_surf, [0,0])
 
 def main():
     # Init pygame
@@ -338,7 +352,7 @@ def main():
                     # scroll up
                     if 'CTRL' in mod_keys:
                         # Zoom in
-                        pass
+                        viewport.zoom *= 2.0
                     else:
                         # Level up
                         pass
@@ -346,7 +360,7 @@ def main():
                     # scroll down
                     if 'CTRL' in mod_keys:
                         # Zoom out
-                        pass
+                        viewport.zoom /= 2.0
                     else:
                         # Level down
                         pass
