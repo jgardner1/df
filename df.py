@@ -31,7 +31,7 @@ class MapModel(object):
         self.depth = 1
 
         self.tiles = transpose([
-            [random.choice([0,1,2,3]) for _ in range(self.width)]
+            [random.choice([4,5,6,7]) for _ in range(self.width)]
             for _ in range(self.height)])
 
     def terrain(self,x,y):
