@@ -12,7 +12,7 @@ except ImportError:
     raise
 
 window = pyglet.window.Window()
-image = pyglet.resource.image('simple.jpg')
+image = pyglet.resource.image('simple.png')
 
 @window.event
 def on_draw():
