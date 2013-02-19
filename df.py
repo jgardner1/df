@@ -6,15 +6,18 @@
 # works for you, whatever that may be.
 
 import random
+import time
 
 try:
     import pyglet
     from pyglet.gl import *
+    from pyglet.window import key, mouse
 except ImportError:
     print "It appears that you have not installed pyglet."
     raise
 
 window = pyglet.window.Window()
+
 image = pyglet.resource.image('simple.png')
 grid = pyglet.image.ImageGrid(image, 16, 16)
 
@@ -40,15 +43,16 @@ class TerrainGroup(pyglet.graphics.Group):
         glPopMatrix()
     
 terrain_group = TerrainGroup()
+item_group = pyglet.graphics.Group(parent=terrain_group)
 
 map_sprites = [
     pyglet.sprite.Sprite(
-        grid[random.choice((255,254,253,252))],
-        x=(i%16)*16,
-        y=(i//16)*16,
+        grid[random.choice(range(244, 256))],
+        x=(i%32)*16,
+        y=(i//32)*16,
         batch=batch,
         group=terrain_group)
-    for i in range(256)
+    for i in range(1024)
 ]
 
 @window.event
@@ -57,20 +61,62 @@ def on_draw():
     batch.draw()
     fps_display.draw()
 
+key_state = set()
+cur_motion = [0,0]
+motion_started = None
+
+def start_motion(dx, dy):
+    global motion_started, cur_motion
+    terrain_group.x += dx*10
+    terrain_group.y += dy*10
+    cur_motion[0] += dx
+    cur_motion[1] += dy
+    motion_started = time.time()
+    
+def stop_motion(dx, dy):
+    global motion_started, cur_motion
+    cur_motion[0] -= dx
+    cur_motion[1] -= dy
+    motion_started = time.time()
+    
+    
+@clock.schedule
+def tick(dt):
+    if cur_motion != [0,0]:
+        if time.time() - motion_started > 0.25:
+            terrain_group.x += cur_motion[0]*4
+            terrain_group.y += cur_motion[1]*4
+
+
 @window.event
 def on_key_press(symbol, modifiers):
-    if symbol == pyglet.window.key.LEFT:
-        terrain_group.x -= 10
-    elif symbol == pyglet.window.key.RIGHT:
-        terrain_group.x += 10
-    elif symbol == pyglet.window.key.DOWN:
-        terrain_group.y -= 10
-    elif symbol == pyglet.window.key.UP:
-        terrain_group.y += 10
+    key_state.add(symbol)
+    if symbol == key.LEFT:
+        start_motion(-1, 0)
+    elif symbol == key.RIGHT:
+        start_motion( 1, 0)
+    elif symbol == key.DOWN:
+        start_motion(0, -1)
+    elif symbol == key.UP:
+        start_motion(0,  1)
+
+
+@window.event
+def on_key_release(symbol, modifiers):
+    key_state.remove(symbol)
+    if symbol == key.LEFT:
+        stop_motion(-1, 0)
+    elif symbol == key.RIGHT:
+        stop_motion( 1, 0)
+    elif symbol == key.DOWN:
+        stop_motion(0, -1)
+    elif symbol == key.UP:
+        stop_motion(0,  1)
+
 
 @window.event
 def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
-    if buttons == pyglet.window.mouse.RIGHT and modifiers == 0:
+    if buttons == mouse.RIGHT and modifiers == 0:
         terrain_group.x += dx
         terrain_group.y += dy
 
