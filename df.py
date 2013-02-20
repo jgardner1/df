@@ -36,6 +36,7 @@ class TerrainGroup(pyglet.graphics.Group):
         self.z = 0
 
     def set_state(self):
+        glMatrixMode(GL_MODELVIEW)
         glPushMatrix()
         glTranslatef(self.x, self.y, self.z)
 
