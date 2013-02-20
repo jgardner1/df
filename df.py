@@ -12,6 +12,8 @@ try:
     import pyglet
     from pyglet.gl import *
     from pyglet.window import key, mouse
+    pyglet.options['audio'] = ('openal', 'directsound', 'alsa', 'silent')
+    import pyglet.media
 except ImportError:
     print "It appears that you have not installed pyglet."
     raise
@@ -19,7 +21,9 @@ except ImportError:
 window = pyglet.window.Window()
 
 bg_music_player = pyglet.media.Player()
-bg_music_player.queue(pyglet.resource.media('dungeon02.mp3'))
+bg_music_player.queue(pyglet.media.load('dungeon01.mp3'))
+bg_music_player.queue(pyglet.media.load('dungeon02.mp3'))
+bg_music_player.eos_action = pyglet.media.Player.EOS_LOOP
 bg_music_player.play()
 
 image = pyglet.resource.image('simple.png')
@@ -139,6 +143,8 @@ def on_key_press(symbol, modifiers):
         start_motion(0, -1)
     elif symbol == key.UP:
         start_motion(0,  1)
+    elif symbol == key.N:
+        bg_music_player.next()
 
 
 @window.event
