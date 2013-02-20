@@ -49,11 +49,11 @@ item_group = pyglet.graphics.Group(parent=terrain_group)
 map_sprites = [
     pyglet.sprite.Sprite(
         grid[random.choice(range(244, 256))],
-        x=(i%32)*16,
-        y=(i//32)*16,
+        x=(i%256)*16,
+        y=(i//256)*16,
         batch=batch,
         group=terrain_group)
-    for i in range(1024)
+    for i in range(256*256)
 ]
 
 @window.event
@@ -79,14 +79,20 @@ def stop_motion(dx, dy):
     cur_motion[0] -= dx
     cur_motion[1] -= dy
     motion_started = time.time()
-    
-    
+
+def calc_motion(dtime, direction):
+    return int(max(-100, min(100,
+        cur_motion[0]*4+cur_motion[0]*dtime**2+0.5)))
+
 @clock.schedule
-def tick(dt):
+def tick_motion(dt):
     if cur_motion != [0,0]:
-        if time.time() - motion_started > 0.25:
-            terrain_group.x += cur_motion[0]*4
-            terrain_group.y += cur_motion[1]*4
+        dtime = time.time() - motion_started
+        if dtime:
+            if cur_motion[0]:
+                terrain_group.x += calc_motion(dtime, cur_motion[0])
+            if cur_motion[1]:
+                terrain_group.y += calc_motion(dtime, cur_motion[1])
 
 
 @window.event
