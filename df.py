@@ -21,9 +21,8 @@ except ImportError:
 window = pyglet.window.Window()
 
 bg_music_player = pyglet.media.Player()
-bg_music_player.queue(pyglet.media.load('dungeon01.mp3'))
 bg_music_player.queue(pyglet.media.load('dungeon02.mp3'))
-bg_music_player.eos_action = pyglet.media.Player.EOS_LOOP
+bg_music_player.eos_action = 'loop'
 bg_music_player.play()
 
 image = pyglet.resource.image('simple.png')
