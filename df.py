@@ -43,18 +43,48 @@ class TerrainGroup(pyglet.graphics.Group):
     def unset_state(self):
         glPopMatrix()
     
-terrain_group = TerrainGroup()
-item_group = pyglet.graphics.Group(parent=terrain_group)
+class Map(object):
+    """The model for the map terrain."""
 
-map_sprites = [
-    pyglet.sprite.Sprite(
-        grid[random.choice(range(244, 256))],
-        x=(i%256)*16,
-        y=(i//256)*16,
-        batch=batch,
-        group=terrain_group)
-    for i in range(256*256)
-]
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.tiles = [
+            [random.randrange(244, 256) for y in range(height)]
+            for x in range(width)]
+
+    def __getitem__(self, i):
+        return self.tiles[i]
+
+class MapView(object):
+    """Shows the map."""
+
+    def __init__(self, model, batch):
+        self.batch = batch
+        self.terrain_group = TerrainGroup()
+        self.sprites = []
+        self.model = model
+
+        self.gen_sprites()
+
+    def gen_sprites(self):
+        b = self.batch
+        g = self.terrain_group
+
+        self.sprites = [
+                [pyglet.sprite.Sprite(
+                    grid[self.model[x][y]],
+                    x=x*16,
+                    y=y*16,
+                    batch=b,
+                    group=g)
+                for y in range(self.model.height)]
+            for x in range(self.model.width)
+        ]
+
+map = Map(100,100)
+map_view = MapView(map, batch)
+terrain_group = map_view.terrain_group
 
 @window.event
 def on_draw():
@@ -83,6 +113,7 @@ def stop_motion(dx, dy):
 def calc_motion(dtime, direction):
     return int(max(-100, min(100,
         cur_motion[0]*4+cur_motion[0]*dtime**2+0.5)))
+        
 
 @clock.schedule
 def tick_motion(dt):
