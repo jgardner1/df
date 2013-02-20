@@ -53,12 +53,16 @@ class TerrainGroup(pyglet.graphics.Group):
 class Map(object):
     """The model for the map terrain."""
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, depth):
         self.width = width
         self.height = height
+        self.depth = depth
         self.tiles = [
-            [random.randrange(244, 256) for y in range(height)]
-            for x in range(width)]
+            [
+                [random.randrange(244, 256)
+                    for y in range(height)]
+                for x in range(width)]
+            for z in range(depth)]
 
     def __getitem__(self, i):
         return self.tiles[i]
@@ -72,15 +76,21 @@ class MapView(object):
         self.sprites = []
         self.model = model
 
+        # The current z level we are looking at.
+        self.z = 0
+
         self.gen_sprites()
 
     def gen_sprites(self):
+        Sprite = pyglet.sprite.Sprite
         b = self.batch
         g = self.terrain_group
+        level = self.model[self.z]
+
 
         self.sprites = [
-                [pyglet.sprite.Sprite(
-                    grid[self.model[x][y]],
+                [Sprite(
+                    grid[level[x][y]],
                     x=x*16,
                     y=y*16,
                     batch=b,
@@ -89,7 +99,7 @@ class MapView(object):
             for x in range(self.model.width)
         ]
 
-map = Map(100,100)
+map = Map(100,100,10)
 map_view = MapView(map, batch)
 terrain_group = map_view.terrain_group
 
@@ -142,8 +152,12 @@ def on_key_press(symbol, modifiers):
         start_motion(0, -1)
     elif symbol == key.UP:
         start_motion(0,  1)
-    elif symbol == key.N:
-        bg_music_player.next()
+    elif symbol == key.COMMA and modifiers == key.MOD_SHIFT:
+        map_view.z = max(0, map_view.z-1)
+        map_view.gen_sprites()
+    elif symbol == key.PERIOD and modifiers == key.MOD_SHIFT:
+        map_view.z = min(map.depth-1, map_view.z+1)
+        map_view.gen_sprites()
 
 
 @window.event
