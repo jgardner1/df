@@ -18,6 +18,10 @@ except ImportError:
 
 window = pyglet.window.Window()
 
+bg_music_player = pyglet.media.Player()
+bg_music_player.queue(pyglet.resource.media('dungeon02.mp3'))
+bg_music_player.play()
+
 image = pyglet.resource.image('simple.png')
 grid = pyglet.image.ImageGrid(image, 16, 16)
 
