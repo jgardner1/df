@@ -98,8 +98,6 @@ motion_started = None
 
 def start_motion(dx, dy):
     global motion_started, cur_motion
-    terrain_group.x += dx*10
-    terrain_group.y += dy*10
     cur_motion[0] += dx
     cur_motion[1] += dy
     motion_started = time.time()
@@ -112,7 +110,7 @@ def stop_motion(dx, dy):
 
 def calc_motion(dtime, direction):
     return int(max(-100, min(100,
-        cur_motion[0]*4+cur_motion[0]*dtime**2+0.5)))
+        direction*4+direction*dtime**2+0.5)))
         
 
 @clock.schedule
