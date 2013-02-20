@@ -1,0 +1,19 @@
+TODO/NOTES
+
+* Maps with depth. Moving up and down either with the scroll wheel, a key
+combo plus mouse motion vertically, or the same key combo and up/down.
+
+I'd like to have a depth test. Draw the next 4 levels, using a fog so that the
+4th level is very, very dim. Perhaps even get some perspective going? What
+should the fog color be?
+
+Or perhaps I can do an overlay of colored tiles that are transparent. These
+will be colored based on the light in the cell below. This might give a cheap
+volumetric feeling. It could also be for the topmost layer.
+
+Moving up/down should "peel" away the top layer or stick it back on? Some kind
+of animation seems important.
+
+* Saving maps. Store the maps in a file. File format: JSON? Or maybe pickle
+format. When I move to C, I can write a script to convert from pickle to C's
+format. cPickle may or may not be faster than JSON.
