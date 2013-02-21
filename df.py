@@ -70,12 +70,11 @@ class MapView(object):
         Sprite = pyglet.sprite.Sprite
         b = self.batch
         g = self.terrain_group
-        level = self.model[self.z]
 
 
         self.sprites = [
                 [Sprite(
-                    grid[level[x][y]],
+                    grid[self.model[x,y,self.z]],
                     x=x*16,
                     y=y*16,
                     batch=b,
