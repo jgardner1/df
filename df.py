@@ -31,8 +31,8 @@ grid = pyglet.image.ImageGrid(image, 16, 16)
 batch = pyglet.graphics.Batch()
 
 fps_display = pyglet.clock.ClockDisplay(color=(1.0, 1.0, 1.0, 1.0))
-clock = pyglet.clock.get_default()
-clock.set_fps_limit(60)
+# This seems to do nothing as of 1.2
+#pyglet.clock.set_fps_limit(60)
 
 class TerrainGroup(pyglet.graphics.Group):
     
@@ -105,6 +105,8 @@ terrain_group = map_view.terrain_group
 
 @window.event
 def on_draw():
+    # Putting this here drives the clock to be 2x fps_limit
+    #pyglet.clock.tick()
     window.clear()
     batch.draw()
     fps_display.draw()
@@ -128,10 +130,11 @@ def stop_motion(dx, dy):
 def calc_motion(dtime, direction):
     return int(max(-100, min(100,
         direction*4+direction*dtime**2+0.5)))
-        
+ 
 
-@clock.schedule
+@pyglet.clock.schedule
 def tick_motion(dt):
+    # Putting pyglet.clock.tick() here causes an infinite recursion.
     if cur_motion != [0,0]:
         dtime = time.time() - motion_started
         if dtime:
@@ -139,7 +142,6 @@ def tick_motion(dt):
                 terrain_group.x += calc_motion(dtime, cur_motion[0])
             if cur_motion[1]:
                 terrain_group.y += calc_motion(dtime, cur_motion[1])
-
 
 @window.event
 def on_key_press(symbol, modifiers):
