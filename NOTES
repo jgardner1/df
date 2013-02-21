@@ -36,11 +36,38 @@ Or I can do what Dwarf Fortress does, and alternate FG and BG colors for
 different materials.
 
 
+
+GENERATION ALGORITHM
+--------------------
+
+An algorithm I used that was nice was to do a random walk, increasing the
+terrain underneath by a certain height. I could do the same for ore or
+whatnot. If I want a vein, I can vary the width of the vein, and then have a
+direction that doesn't change very much, or a force that pulls the random walk
+in one direction compared to another. I can vary levels as well to have veins
+that go through levels.
+
+Modeling water: I should study how hydrodynamics works in relation to erosion
+and such. Maybe what I can do is model the plate tectonics of the region, and
+then model soil build up and water behavior, and then model what plants do to
+prevent erosion, and then on top of that throw a few world-wide catastrophes
+such as a flood or a meteor crater.
+
+Physics: I think I need to build up a physical model of how terrain works. I
+need to understand shear forces and such, and a simple way to model if you can
+build rooms of certain size. Also, what do supports do and how much weight
+can they carry? Should dwarves build these automatically or should I requie
+the player to build them?
+
+
+
 BUGS
 ----
 
 I can't seem to get the background music to repeat. I would like it if
 eos_action worked on Player, but it doesn't. I think I need to debug Pyglet.
+Maybe I need to get the player integrated into the event stack? Is it not even
+calling?
 
 
 
