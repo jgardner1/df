@@ -18,3 +18,34 @@ of animation seems important.
 * Saving maps. Store the maps in a file. File format: JSON? Or maybe pickle
 format. When I move to C, I can write a script to convert from pickle to C's
 format. cPickle may or may not be faster than JSON.
+
+* Tiling different kinds of stone. Let's say I have 16 different colors of
+stone, plus 4 or so colors of wood, for 20 colors of material altogether. That
+means for every item I have, I need to have a cell that describes it. That's
+20 up stairs, 20 down stairs, and 20 up/down stairs, and 20 tables, etc...
+This leads me to believe that I can have some algorithmically generated tiles?
+Or maybe tiles have 3 colors, and the colors are determined by the material?
+Perhaps I can do something like specifying 1 tile for all objects, and then
+layering on top of it a texture. If the tile specified the normal, then we can
+shade with dynamic lighting. This would be interesting.
+
+Or I can go the minecraft route and just make things in 3D and have 20
+different kinds of textures.
+
+Or I can do what Dwarf Fortress does, and alternate FG and BG colors for
+different materials.
+
+
+BUGS
+----
+
+I can't seem to get the background music to repeat. I would like it if
+eos_action worked on Player, but it doesn't. I think I need to debug Pyglet.
+
+
+
+Drawing the next level is slow. I need a way to quickly draw floors, since I
+plan on having 4 floors of stuff drawn at once.
+
+I think I can create sections of the floor that are 16x16 tiles or so. I can
+rotate in/out sections as needed. I can pre-create sections as well.
