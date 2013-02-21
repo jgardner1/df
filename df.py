@@ -18,7 +18,7 @@ except ImportError:
     print "It appears that you have not installed pyglet."
     raise
 
-from map import Map
+from map_gen import map_gen
 
 window = pyglet.window.Window()
 
@@ -83,7 +83,7 @@ class MapView(object):
             for x in range(self.model.width)
         ]
 
-map = Map(100,100,10)
+map = map_gen(100,100)
 map_view = MapView(map, batch)
 terrain_group = map_view.terrain_group
 
