@@ -18,6 +18,8 @@ except ImportError:
     print "It appears that you have not installed pyglet."
     raise
 
+from map import Map
+
 window = pyglet.window.Window()
 
 bg_music_player = pyglet.media.Player()
@@ -50,23 +52,6 @@ class TerrainGroup(pyglet.graphics.Group):
     def unset_state(self):
         glPopMatrix()
     
-class Map(object):
-    """The model for the map terrain."""
-
-    def __init__(self, width, height, depth):
-        self.width = width
-        self.height = height
-        self.depth = depth
-        self.tiles = [
-            [
-                [random.randrange(244, 256)
-                    for y in range(height)]
-                for x in range(width)]
-            for z in range(depth)]
-
-    def __getitem__(self, i):
-        return self.tiles[i]
-
 class MapView(object):
     """Shows the map."""
 
