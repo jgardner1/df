@@ -23,9 +23,32 @@ from map_gen import map_gen
 window = pyglet.window.Window()
 
 bg_music_player = pyglet.media.Player()
-bg_music_player.queue(pyglet.media.load('dungeon02.mp3'))
-bg_music_player.eos_action = 'loop'
+
+bg_music_player.queue(pyglet.media.load('dungeon02.mp3', streaming=False))
+
+# This is deprecated --- and broken!
+#bg_music_player.eos_action = 'loop'
+bg_music_player._groups[-1].loop = True
+
 bg_music_player.play()
+
+#@bg_music_player.event
+#def on_eos():
+#    """Called each time we restart the music."""
+#    #print "on_eos()"
+#    pass
+#
+#@bg_music_player.event
+#def on_player_eos():
+#    """Called when the player runs out of music."""
+#    #print "on_player_eos()"
+#    pass
+#
+#@bg_music_player.event
+#def on_source_group_eos():
+#    """Called when a group runs out of music."""
+#    #print "on_source_group_eos()"
+#    pass
 
 image = pyglet.resource.image('simple.png')
 grid = pyglet.image.ImageGrid(image, 16, 16)
