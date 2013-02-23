@@ -52,6 +52,39 @@ class Window(pyglet.window.Window):
         batch.draw()
         fps_display.draw()
 
+    def on_key_press(self, symbol, modifiers):
+        key_state.add(symbol)
+        if symbol == key.LEFT:
+            start_motion(-1, 0)
+        elif symbol == key.RIGHT:
+            start_motion( 1, 0)
+        elif symbol == key.DOWN:
+            start_motion(0, -1)
+        elif symbol == key.UP:
+            start_motion(0,  1)
+        elif symbol == key.COMMA and modifiers == key.MOD_SHIFT:
+            map_view.z = max(0, map_view.z-1)
+            map_view.gen_sprites()
+        elif symbol == key.PERIOD and modifiers == key.MOD_SHIFT:
+            map_view.z = min(map.depth-1, map_view.z+1)
+            map_view.gen_sprites()
+
+    def on_key_release(self, symbol, modifiers):
+        key_state.remove(symbol)
+        if symbol == key.LEFT:
+            stop_motion(-1, 0)
+        elif symbol == key.RIGHT:
+            stop_motion( 1, 0)
+        elif symbol == key.DOWN:
+            stop_motion(0, -1)
+        elif symbol == key.UP:
+            stop_motion(0,  1)
+
+    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        if buttons == mouse.RIGHT and modifiers == 0:
+            terrain_group.x += dx
+            terrain_group.y += dy
+
 window = Window(caption="df by Jonathan Gardner", resizable=True)
 
 bg_music_player = pyglet.media.Player()
@@ -214,57 +247,6 @@ def tick_motion(dt):
                 terrain_group.x += calc_motion(dtime, cur_motion[0])
             if cur_motion[1]:
                 terrain_group.y += calc_motion(dtime, cur_motion[1])
-
-@window.event
-def on_key_press(symbol, modifiers):
-    key_state.add(symbol)
-    if symbol == key.LEFT:
-        start_motion(-1, 0)
-    elif symbol == key.RIGHT:
-        start_motion( 1, 0)
-    elif symbol == key.DOWN:
-        start_motion(0, -1)
-    elif symbol == key.UP:
-        start_motion(0,  1)
-    elif symbol == key.COMMA and modifiers == key.MOD_SHIFT:
-        map_view.z = max(0, map_view.z-1)
-        map_view.gen_sprites()
-    elif symbol == key.PERIOD and modifiers == key.MOD_SHIFT:
-        map_view.z = min(map.depth-1, map_view.z+1)
-        map_view.gen_sprites()
-
-    elif symbol == key.F:
-        terrain_group.fog_mode = {
-            GL_EXP: GL_LINEAR,
-            GL_LINEAR: GL_EXP2,
-            GL_EXP2: GL_EXP,
-        }[terrain_group.fog_mode]
-    elif symbol == key.D:
-        if modifiers == key.MOD_SHIFT:
-            terrain_group.fog_density *= 1.1
-        else:
-            terrain_group.fog_density *= 0.9
-        print "terrain_group.fog_density = %r" % terrain_group.fog_density
-
-
-@window.event
-def on_key_release(symbol, modifiers):
-    key_state.remove(symbol)
-    if symbol == key.LEFT:
-        stop_motion(-1, 0)
-    elif symbol == key.RIGHT:
-        stop_motion( 1, 0)
-    elif symbol == key.DOWN:
-        stop_motion(0, -1)
-    elif symbol == key.UP:
-        stop_motion(0,  1)
-
-
-@window.event
-def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
-    if buttons == mouse.RIGHT and modifiers == 0:
-        terrain_group.x += dx
-        terrain_group.y += dy
 
 def main():
     pyglet.app.run()
