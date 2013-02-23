@@ -1,0 +1,8 @@
+Tile key for simple.png/xcf:
+
+0: Empty space.
+
+255-252: Rough rock floor
+251-248: Rough dirt floor
+247-244: Grass floor
+243-240: Water floor/surface
