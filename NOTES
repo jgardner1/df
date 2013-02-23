@@ -35,6 +35,19 @@ different kinds of textures.
 Or I can do what Dwarf Fortress does, and alternate FG and BG colors for
 different materials.
 
+UPDATING THE MAP
+----------------
+
+The map is going to contain ALL the things needed to draw *any* view of the
+map. This includes items.
+
+Whenever something changes, for instance, an item moves or a cube is cleared
+or something built, then the map will create an event/signal that indicates
+what changed. The MapView will listen for these, and update the VertexArray
+accordingly.
+
+
+
 
 
 GENERATION ALGORITHM
