@@ -17,18 +17,18 @@ def map_gen(width=100, height=100):
         for y in range(height)])
 
     m.tiles.extend([
-        random.randrange(244,248)
+        random.choice((0, 0, 244, 245, 246, 247))
         for x in range(width)
         for y in range(height)])
 
     m.tiles.extend([
-        random.randrange(248,252)
+        random.choice((0, 0, 248, 249, 250, 251))
         for x in range(width)
         for y in range(height)])
 
     for z in range(depth-2):
         m.tiles.extend([
-            random.randrange(252,256)
+            random.choice((0, 0, 252, 253, 254, 255))
             for x in range(width)
             for y in range(height)])
 

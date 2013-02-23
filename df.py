@@ -20,7 +20,39 @@ except ImportError:
 
 from map_gen import map_gen
 
-window = pyglet.window.Window()
+class Window(pyglet.window.Window):
+    fog_color = (GLfloat*4)(47.0/256, 102.0/256, 117.0/256, 1.0)
+    fog_mode = GL_EXP
+    fog_density = 0.35
+
+    def __init__(self, *args, **kwargs):
+        pyglet.window.Window.__init__(self, *args, **kwargs)
+
+        glClearColor(*self.fog_color)
+        glEnable(GL_FOG)
+        glFogi(GL_FOG_MODE, self.fog_mode)
+        glFogfv(GL_FOG_COLOR, self.fog_color)
+        glFogf(GL_FOG_DENSITY, self.fog_density)
+        glHint(GL_FOG_HINT, GL_DONT_CARE)
+        glFogi(GL_FOG_START, 1)
+        glFogi(GL_FOG_END, 10)
+
+
+    def on_resize(self, width, height):
+        glViewport(0, 0, width, height)
+        glMatrixMode(gl.GL_PROJECTION)
+        glLoadIdentity()
+        glOrtho(0, width, 0, height, -100, 1)
+        glMatrixMode(gl.GL_MODELVIEW)
+
+    def on_draw(self):
+        # Putting this here drives the clock to be 2x fps_limit
+        #pyglet.clock.tick()
+        self.clear()
+        batch.draw()
+        fps_display.draw()
+
+window = Window(caption="df by Jonathan Gardner", resizable=True)
 
 bg_music_player = pyglet.media.Player()
 
@@ -51,6 +83,7 @@ bg_music_player.play()
 #    pass
 
 image = pyglet.resource.image('simple.png')
+image_texture = image.get_texture()
 grid = pyglet.image.ImageGrid(image, 16, 16)
 
 batch = pyglet.graphics.Batch()
@@ -67,12 +100,23 @@ class TerrainGroup(pyglet.graphics.Group):
         self.y = 0
         self.z = 0
 
+        self.fog_mode = GL_EXP
+        self.fog_density = 0.35
+
     def set_state(self):
         glMatrixMode(GL_MODELVIEW)
         glPushMatrix()
         glTranslatef(self.x, self.y, self.z)
 
+        glEnable(image_texture.target)
+        glBindTexture(image_texture.target, image_texture.id)
+
+        # Enable the alpha channel
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
     def unset_state(self):
+        glDisable(image_texture.target)
         glPopMatrix()
     
 class MapView(object):
@@ -87,36 +131,57 @@ class MapView(object):
         # The current z level we are looking at.
         self.z = 0
 
+        self.vertex_list = None
         self.gen_sprites()
 
     def gen_sprites(self):
-        Sprite = pyglet.sprite.Sprite
         b = self.batch
         g = self.terrain_group
+        m = self.model
+        z = self.z
 
+        if self.vertex_list:
+            self.vertex_list.delete()
 
-        self.sprites = [
-                [Sprite(
-                    grid[self.model[x,y,self.z]],
-                    x=x*16,
-                    y=y*16,
-                    batch=b,
-                    group=g)
-                for y in range(self.model.height)]
-            for x in range(self.model.width)
-        ]
+        vertices = []
+        textures = []
+
+        bit = 1.0/256
+        for x in range(m.width):
+            for y in range(m.height):
+                dz = 0
+                while dz < 10 and z+dz < m.depth:
+                    t = m[x,y,z+dz]
+                    if t != 0:
+                        break
+                    else:
+                        dz += 1
+
+                vertices.extend([
+                    x*16,       y*16+16,    dz,
+                    x*16,       y*16,       dz,
+                    x*16+16,    y*16,       dz,
+                    x*16+16,    y*16+16,    dz,
+                ])
+                tx = t%16
+                ty = t//16
+                textures.extend([
+                    (tx*16   )*bit, (ty*16+16)*bit,
+                    (tx*16   )*bit, (ty*16   )*bit,
+                    (tx*16+16)*bit, (ty*16   )*bit,
+                    (tx*16+16)*bit, (ty*16+16)*bit,
+                ])
+
+        self.vertex_list = self.batch.add(
+            m.width*m.height*4, # number of vertices
+            GL_QUADS, # mode
+            g, # group
+            ('v3i', tuple(vertices)),
+            ('t2f', tuple(textures)))
 
 map = map_gen(100,100)
 map_view = MapView(map, batch)
 terrain_group = map_view.terrain_group
-
-@window.event
-def on_draw():
-    # Putting this here drives the clock to be 2x fps_limit
-    #pyglet.clock.tick()
-    window.clear()
-    batch.draw()
-    fps_display.draw()
 
 key_state = set()
 cur_motion = [0,0]
@@ -167,6 +232,19 @@ def on_key_press(symbol, modifiers):
     elif symbol == key.PERIOD and modifiers == key.MOD_SHIFT:
         map_view.z = min(map.depth-1, map_view.z+1)
         map_view.gen_sprites()
+
+    elif symbol == key.F:
+        terrain_group.fog_mode = {
+            GL_EXP: GL_LINEAR,
+            GL_LINEAR: GL_EXP2,
+            GL_EXP2: GL_EXP,
+        }[terrain_group.fog_mode]
+    elif symbol == key.D:
+        if modifiers == key.MOD_SHIFT:
+            terrain_group.fog_density *= 1.1
+        else:
+            terrain_group.fog_density *= 0.9
+        print "terrain_group.fog_density = %r" % terrain_group.fog_density
 
 
 @window.event
