@@ -30,8 +30,8 @@ class Map(object):
         self.height = height
         self.depth = depth
 
-        self.tiles = array('B')
-        self.tile = self.ArrayWrapper(self, self.tiles)
+        self.tile_array = array('B')
+        self.tile = self.ArrayWrapper(self, self.tile_array)
 
-        self.terrain = array('B')
-        self.terrain = self.ArrayWrapper(self, self.terrain)
+        self.terrain_array = array('B')
+        self.terrain = self.ArrayWrapper(self, self.terrain_array)
