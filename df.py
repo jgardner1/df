@@ -170,7 +170,7 @@ class MapView(object):
     def gen_sprites(self):
         b = self.batch
         g = self.terrain_group
-        m = self.model
+        m = self.model.tile
         z = self.z
 
         if self.vertex_list:
