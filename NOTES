@@ -77,6 +77,24 @@ find certain minerals? For instance, does gold collect in pockets in intrusive
 igneous rocks?
 
 
+VISIBILITY
+----------
+
+I would like to have a Fog of War going on. Each tile is marked with whether
+you can see it. If you can, it is then marked with whether it is currently
+visible, how long since you saw it, and what you saw last.
+
+You can only see so far in air and water. To simulate this, the distance to
+see the spot is accounted for using the simple mapping algorithm.
+
+Perhaps I can take into account the number of paths that lead to the point? I
+don't know.
+
+Do I want to consider only Line of Sight? I think this is a good idea. Some
+kind of raycasting algorithm that will increase the number of rays the further
+you get out?
+
+
 
 MULTIPROCESSING
 ---------------
