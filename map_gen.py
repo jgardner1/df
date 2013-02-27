@@ -32,36 +32,31 @@ tiles = {
 }
 
 def map_gen(width=100, height=100):
-    depth = 5
+    depth = 20
     m = Map(width, height, depth)
 
-    # Zero everything out. Bottom layer is stone.
-    m.terrain_array.extend([0]*width*height*(depth-1))
-    m.terrain_array.extend([4]*width*height)
-
-    def coord(x,y,z):
-        return x + width*(y + height*z)
-
-    def get(x,y,z):
-        return m.terrain_array[coord(x,y,z)]
-
-    def set(x,y,z, val):
-        m.terrain_array[coord(x,y,z)] = val
+    height_map = [0]*(width*height)
 
     for j in xrange(100):
         pos = Vec2(random.randrange(width), random.randrange(height))
-        for i in xrange(100):
+        for i in xrange(1000):
             if 0 <= pos.x < width and 0 <= pos.y < height:
-                set(pos.x, pos.y, depth-2, 3)
+                height_map[pos.x + width*pos.y] += 1
             pos += random.choice((
                 Vec2(1,0),
                 Vec2(-1,0),
                 Vec2(0,1),
                 Vec2(0,-1)))
 
-        
+    for z in range(depth-1):
+        for y in range(height):
+            for x in range(width):
+                if (depth-z) <= height_map[x + width*y]:
+                    m.terrain_array.append(4)
+                else:
+                    m.terrain_array.append(0)
 
-
+    m.terrain_array.extend([4]*(width*height))
 
     # Turn the terrain into tiles
     for terrain in m.terrain_array:
