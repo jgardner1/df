@@ -49,12 +49,14 @@ def map_gen(width=100, height=100):
                 Vec2(0,-1)))
 
     terrain_append = m.terrain_array.append
-    for z in range(depth-1):
+    m.terrain_array.extend([0]*(width*height))
+
+    for z in range(1, depth-1):
         for y in range(height):
             for x in range(width):
                 dmz = depth-z
                 hm = height_map[x + width*y]
-                if dmz == hm + 1:
+                if dmz == hm + 1 or (dmz <= hm and z==1):
                     terrain = 3
                 elif dmz <= hm:
                     terrain = 4
