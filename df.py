@@ -171,6 +171,7 @@ class MapView(object):
         b = self.batch
         g = self.terrain_group
         m = self.model.tile
+        v = self.model.vis
         z = self.z
 
         if self.vertex_list:
@@ -184,6 +185,11 @@ class MapView(object):
             for y in range(m.height):
                 dz = 0
                 while dz < 10 and z+dz < m.depth:
+                    if not v[x,y,z+dz]:
+                        # If they can't see the square, it is invisible.
+                        t = 1
+                        break
+
                     t = m[x,y,z+dz]
                     if t != 0:
                         break

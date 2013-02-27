@@ -35,3 +35,7 @@ class Map(object):
 
         self.terrain_array = array('B')
         self.terrain = self.ArrayWrapper(self, self.terrain_array)
+
+        self.vis_array = array('B')
+        self.vis = self.ArrayWrapper(self, self.vis_array)
+

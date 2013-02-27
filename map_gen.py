@@ -72,4 +72,13 @@ def map_gen(width=100, height=100):
         m.tile_array.append(
             random.choice(tiles[terrain]))
 
+    # Calculate what squares are visible.
+    # 0 - invisible
+    # 1 - visible.
+    # In the future, add more values for Fog of War. Maybe including lighting
+    # or some such in this.
+    m.vis_array.extend([1]*(width*height))
+    m.vis_array.extend([0]*(width*height*(depth-1)))
+
+
     return m
