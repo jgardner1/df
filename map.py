@@ -17,6 +17,9 @@ class Map(object):
         def __getitem__(self, (x,y,z)):
             return self.array[x + self.width*(y + self.height*z)]
 
+        def __setitem__(self, (x,y,z), v):
+            self.array[x + self.width*(y + self.height*z)] = v
+
     def __init__(self, width, height, depth):
         width = int(width)
         height = int(height)

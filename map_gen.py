@@ -80,5 +80,33 @@ def map_gen(width=100, height=100):
     m.vis_array.extend([1]*(width*height))
     m.vis_array.extend([0]*(width*height*(depth-1)))
 
+    points_seen = set()
+    points_to_see = set([(x,y,0)
+        for x in range(width)
+        for y in range(height)])
+
+    while points_to_see:
+        x,y,z = points_to_see.pop()
+        points_seen.add((x,y,z))
+        for dx, dy, dz in (
+            (1,0,0), (-1,0,0),
+            (0,1,0), (0,-1,0),
+            (0,0,1), (0,0,-1),
+        ):
+            x1, y1, z1 = x+dx, y+dy, z+dz
+
+            if x1 < 0 or x1 >= width or \
+                    y1 < 0 or y1 >= height  or \
+                    z1 < 0 or z1 >= depth:
+                continue
+            v1 = (x1, y1, z1)
+            if v1 in points_seen:
+                continue
+            points_seen.add(v1)
+            
+            m.vis[v1] = 1
+            t = m.terrain[v1]
+            if t == 0:
+                points_to_see.add(v1)
 
     return m
