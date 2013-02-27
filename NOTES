@@ -76,18 +76,24 @@ I need to study geology. How are rocks formed? Where do geologists expect to
 find certain minerals? For instance, does gold collect in pockets in intrusive
 igneous rocks?
 
+
+
+MULTIPROCESSING
+---------------
+
+I think using the "multiprocess" module is wise.
+
+I will probably need:
+(1) A synchronization method so that we can process 1 tick at a time.
+(2) A shared memory segment for the game state.
+(3) A dispatch method so that updates can be made in parallel. If they have 6
+cores, then we run 6 clients, and we send the updates that need to be
+performed in parallel to each one.
+
+
+
+
+
+
 BUGS
 ----
-
-I can't seem to get the background music to repeat. I would like it if
-eos_action worked on Player, but it doesn't. I think I need to debug Pyglet.
-Maybe I need to get the player integrated into the event stack? Is it not even
-calling?
-
-
-
-Drawing the next level is slow. I need a way to quickly draw floors, since I
-plan on having 4 floors of stuff drawn at once.
-
-I think I can create sections of the floor that are 16x16 tiles or so. I can
-rotate in/out sections as needed. I can pre-create sections as well.
