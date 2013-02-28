@@ -1,23 +1,36 @@
-TODO/NOTES
+TODO
+====
 
-* Maps with depth. Moving up and down either with the scroll wheel, a key
+* Py2exe. Figure out how to distribute this thing.
+    * See http://www.py2exe.org/index.cgi/Tutorial and http://gizmothunder.blogspot.com/2010/09/pyglet-py2exe.html
+    * Setup.py
+
+
+* Moving up and down either with the scroll wheel, a key
 combo plus mouse motion vertically, or the same key combo and up/down.
 
-I'd like to have a depth test. Draw the next 4 levels, using a fog so that the
-4th level is very, very dim. Perhaps even get some perspective going? What
-should the fog color be?
 
-Or perhaps I can do an overlay of colored tiles that are transparent. These
-will be colored based on the light in the cell below. This might give a cheap
-volumetric feeling. It could also be for the topmost layer. Perhaps the open
-cell above keeps track of the light level below and draws a transparent layer?
+* Zoom out and jump interface. Eliana's idea is to press a key, see the entire
+map, and then click on a point that it jumps to.
 
-Moving up/down should "peel" away the top layer or stick it back on? Some kind
-of animation seems important.
+* Moving up/down should "peel" away the top layer or stick it back on? Some kind
+of animation seems important. Possibilities:
+    * Rotating tiles? When moving up, the top layer rotates away. When moving
+    down, the top level rotates in.
+    * Phasing in
+    * Gradual, rather than atomic, moves through depth.
+
+* Moving up/down still takes a while. I need a faster algorithm.
+    * Can I store the entire map's vertices in the video card memory? Then I
+    could use depth testing.
+
+    * Can I redraw only some of the tiles? The ones that are deep need only to
+    move up.
+
 
 * Saving maps. Store the maps in a file. File format: JSON? Or maybe pickle
 format. When I move to C, I can write a script to convert from pickle to C's
-format. cPickle may or may not be faster than JSON.
+format. cPickle may or may not be faster than JSON, so make it general.
 
 * Tiling different kinds of stone. Let's say I have 16 different colors of
 stone, plus 4 or so colors of wood, for 20 colors of material altogether. That
@@ -35,7 +48,28 @@ different kinds of textures.
 Or I can do what Dwarf Fortress does, and alternate FG and BG colors for
 different materials.
 
-UPDATING THE MAP
+* Items on the map. Add things that the dwarves can interact with.
+
+* Dwarves on the map. At first, they just wander around randomly.
+
+* AI with pathfinding for the Dwarves. Have them choose two random points on
+the map and have them walk back and forth.
+
+* Animate the dwarves and the items.
+
+* Water. I would like water to be semi-realistic. With the modern GPUs, it
+should be possible to make neat water effects without using tiles.
+
+* Perspective. If I actually drew the walls, I think it might be easier to
+tell them apart from the floors. But then we're in full 3D mode, aren't we?
+
+
+DESIGN
+======
+
+
+
+Updating the Map
 ----------------
 
 The map is going to contain ALL the things needed to draw *any* view of the
@@ -48,9 +82,7 @@ accordingly.
 
 
 
-
-
-GENERATION ALGORITHM
+Generation Algorithm
 --------------------
 
 An algorithm I used that was nice was to do a random walk, increasing the
@@ -77,7 +109,8 @@ find certain minerals? For instance, does gold collect in pockets in intrusive
 igneous rocks?
 
 
-VISIBILITY
+
+Visibility
 ----------
 
 I would like to have a Fog of War going on. Each tile is marked with whether
@@ -96,7 +129,7 @@ you get out?
 
 
 
-MULTIPROCESSING
+Multiprocessing
 ---------------
 
 I think using the "multiprocess" module is wise.
@@ -111,7 +144,19 @@ performed in parallel to each one.
 
 
 
-
-
 BUGS
-----
+====
+
+* The air fog stinks, bad.
+
+* It's too hard to tell what tiles are floors and which are walls.
+
+
+
+
+CRAZY IDEAS
+===========
+
+Candy mountain?
+
+Make christmas stuff for Santa?
