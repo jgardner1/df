@@ -68,6 +68,13 @@ class Window(pyglet.window.Window):
         elif symbol == key.PERIOD and modifiers == key.MOD_SHIFT:
             map_view.z = min(map.depth-1, map_view.z+1)
             map_view.gen_sprites()
+        elif symbol == key.Z:
+            if modifiers == key.MOD_SHIFT:
+                terrain_group.zoom *= 1.1
+            elif modifiers == key.MOD_CTRL:
+                terrain_group.zoom = 1.0
+            else:
+                terrain_group.zoom /= 1.1
 
     def on_key_release(self, symbol, modifiers):
         key_state.remove(symbol)
@@ -132,6 +139,7 @@ class TerrainGroup(pyglet.graphics.Group):
         self.x = 0
         self.y = 0
         self.z = 0
+        self.zoom = 1.0
 
         self.fog_mode = GL_EXP
         self.fog_density = 0.35
@@ -140,6 +148,7 @@ class TerrainGroup(pyglet.graphics.Group):
         glMatrixMode(GL_MODELVIEW)
         glPushMatrix()
         glTranslatef(self.x, self.y, self.z)
+        glScalef(self.zoom, self.zoom, self.zoom)
 
         glEnable(image_texture.target)
         glBindTexture(image_texture.target, image_texture.id)
