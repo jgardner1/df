@@ -39,9 +39,12 @@ class Window(pyglet.window.Window):
 
 
     def on_resize(self, width, height):
+        global size
+        size = (width, height)
         glViewport(0, 0, width, height)
         glMatrixMode(gl.GL_PROJECTION)
         glLoadIdentity()
+        # This puts (0,0) in the bottom right corner.
         glOrtho(0, width, 0, height, -100, 1)
         glMatrixMode(gl.GL_MODELVIEW)
 
@@ -89,8 +92,8 @@ class Window(pyglet.window.Window):
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         if buttons == mouse.RIGHT and modifiers == 0:
-            terrain_group.x += dx
-            terrain_group.y += dy
+            terrain_group.x += dx/terrain_group.zoom
+            terrain_group.y += dy/terrain_group.zoom
 
 window = Window(caption="df by Jonathan Gardner", resizable=True)
 
@@ -145,13 +148,16 @@ class TerrainGroup(pyglet.graphics.Group):
         self.fog_density = 0.35
 
     def set_state(self):
-        glMatrixMode(GL_MODELVIEW)
+        glMatrixMode(GL_PROJECTION)
         glPushMatrix()
-        glTranslatef(self.x, self.y, self.z)
+        glTranslatef(size[0]/2, size[1]/2, 0)
         glScalef(self.zoom, self.zoom, self.zoom)
+        glTranslatef(-size[0]/2, -size[1]/2, 0)
+        glTranslatef(self.x, self.y, self.z)
 
         glEnable(image_texture.target)
         glBindTexture(image_texture.target, image_texture.id)
+        glTexParameterf(image_texture.target, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
         # Enable the alpha channel
         glEnable(GL_BLEND)
@@ -159,6 +165,7 @@ class TerrainGroup(pyglet.graphics.Group):
 
     def unset_state(self):
         glDisable(image_texture.target)
+        glMatrixMode(GL_PROJECTION)
         glPopMatrix()
     
 class MapView(object):
@@ -214,10 +221,10 @@ class MapView(object):
                 tx = t%16
                 ty = t//16
                 textures.extend([
-                    (tx*16   )*bit, (ty*16+16)*bit,
+                    (tx*16   )*bit, (ty*16+15)*bit,
                     (tx*16   )*bit, (ty*16   )*bit,
-                    (tx*16+16)*bit, (ty*16   )*bit,
-                    (tx*16+16)*bit, (ty*16+16)*bit,
+                    (tx*16+15)*bit, (ty*16   )*bit,
+                    (tx*16+15)*bit, (ty*16+15)*bit,
                 ])
 
         self.vertex_list = self.batch.add(
@@ -259,9 +266,11 @@ def tick_motion(dt):
         dtime = time.time() - motion_started
         if dtime:
             if cur_motion[0]:
-                terrain_group.x += calc_motion(dtime, cur_motion[0])
+                terrain_group.x += calc_motion(dtime,
+                    cur_motion[0])/terrain_group.zoom
             if cur_motion[1]:
-                terrain_group.y += calc_motion(dtime, cur_motion[1])
+                terrain_group.y += calc_motion(dtime,
+                    cur_motion[1])/terrain_group.zoom
 
 def main():
     pyglet.app.run()
