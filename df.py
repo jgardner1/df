@@ -39,8 +39,7 @@ class Window(pyglet.window.Window):
 
 
     def on_resize(self, width, height):
-        global size
-        size = (width, height)
+        self.size = (width, height)
         glViewport(0, 0, width, height)
         glMatrixMode(gl.GL_PROJECTION)
         glLoadIdentity()
@@ -92,12 +91,12 @@ class Window(pyglet.window.Window):
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         if buttons == mouse.MIDDLE and modifiers == 0:
-            terrain_group.x += dx/terrain_group.zoom
-            terrain_group.y += dy/terrain_group.zoom
+                terrain_group.x += dx/terrain_group.zoom
+                terrain_group.y += dy/terrain_group.zoom
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         print x, y, scroll_x, scroll_y
-        map_view.z = min(map.depth-1, max(0, map_view.z-int(scroll_y+0.5)))
+        map_view.z = min(map.depth-1, max(0, map_view.z-int(scroll_y)))
         map_view.gen_sprites()
         
 
@@ -154,11 +153,10 @@ class TerrainGroup(pyglet.graphics.Group):
         self.fog_density = 0.35
 
     def set_state(self):
-        glMatrixMode(GL_PROJECTION)
         glPushMatrix()
-        glTranslatef(size[0]/2, size[1]/2, 0)
+        glTranslatef(window.size[0]/2, window.size[1]/2, 0)
         glScalef(self.zoom, self.zoom, self.zoom)
-        glTranslatef(-size[0]/2, -size[1]/2, 0)
+        glTranslatef(-window.size[0]/2, -window.size[1]/2, 0)
         glTranslatef(self.x, self.y, self.z)
 
         glEnable(image_texture.target)
@@ -171,7 +169,6 @@ class TerrainGroup(pyglet.graphics.Group):
 
     def unset_state(self):
         glDisable(image_texture.target)
-        glMatrixMode(GL_PROJECTION)
         glPopMatrix()
     
 class MapView(object):
