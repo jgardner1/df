@@ -91,9 +91,15 @@ class Window(pyglet.window.Window):
             stop_motion(0,  1)
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-        if buttons == mouse.RIGHT and modifiers == 0:
+        if buttons == mouse.MIDDLE and modifiers == 0:
             terrain_group.x += dx/terrain_group.zoom
             terrain_group.y += dy/terrain_group.zoom
+
+    def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
+        print x, y, scroll_x, scroll_y
+        map_view.z = min(map.depth-1, max(0, map_view.z-int(scroll_y+0.5)))
+        map_view.gen_sprites()
+        
 
 window = Window(caption="df by Jonathan Gardner", resizable=True)
 
